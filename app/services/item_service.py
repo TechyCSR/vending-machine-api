@@ -38,9 +38,9 @@ def bulk_add_items(db: Session, slot_id: str, entries: list[ItemBulkEntry]) -> i
             continue
         item = Item(name=e.name, price=e.price, slot_id=slot_id, quantity=e.quantity)
         db.add(item)
+        slot.current_item_count += e.quantity
         added += 1
-        db.commit()
-        time.sleep(0.05)  # demo: widens race window vs purchase
+    db.commit()
     return added
 
 
