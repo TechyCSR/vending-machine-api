@@ -29,6 +29,9 @@ def bulk_add_items(db: Session, slot_id: str, entries: list[ItemBulkEntry]) -> i
     slot = db.query(Slot).filter(Slot.id == slot_id).first()
     if not slot:
         raise ValueError("slot_not_found")
+    total_qty = sum(e.quantity for e in entries if e.quantity > 0)
+    if slot.current_item_count + total_qty > slot.capacity:
+        raise ValueError("capacity_exceeded")
     added = 0
     for e in entries:
         if e.quantity <= 0:
