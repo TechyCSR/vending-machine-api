@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.schemas import (
     ChangeBreakdownResponse,
+    InsufficientCashError,
+    OutOfStockError,
     PurchaseRequest,
     PurchaseResponse,
 )
@@ -23,18 +25,17 @@ def purchase(data: PurchaseRequest, db: Session = Depends(get_db)):
         if e.args[0] == "out_of_stock":
             raise HTTPException(
                 status_code=400,
-                detail={"error": "Item out of stock"},
+                detail=OutOfStockError().model_dump(),
             )
         if e.args[0] == "insufficient_cash":
             required = e.args[1]
             inserted = e.args[2]
             raise HTTPException(
                 status_code=400,
-                detail={
-                    "error": "Insufficient cash",
-                    "required": required,
-                    "inserted": inserted,
-                },
+                detail=InsufficientCashError(
+                    required=required,
+                    inserted=inserted,
+                ).model_dump(),
             )
         raise
 
